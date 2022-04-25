@@ -1,0 +1,49 @@
+.Main {
+  margin: 0 auto;
+  min-width: 320px;
+  max-width: 1280px;
+  min-height: 648px;
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  background-color: #073042;
+  box-sizing: border-box;
+}
+
+.main__text {
+  margin: 0;
+  margin-top: 20px;
+  font-family: Inter;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 12px;
+  line-height: 18px;
+  /* identical to box height, or 150% */
+  color: #FFFFFF;
+}
+
+.converter__content {
+  margin: 0 auto;
+  text-align: left;
+  padding-top: 70px;
+  padding-bottom: 70px;
+  max-width: 600px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.converter__input-container{
+  margin: 20px auto;
+  display: flex;
+  min-width: 40%;
+}
+
+.converter__input-field {
+  width: 100%;
+}
+
+@media screen and (max-width: 540px) {
+  .converter__content {
+    margin: 0 20px;
+    display: block;
+    text-align: center;
+  }
+}
