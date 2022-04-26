@@ -1,6 +1,6 @@
 import './App.css';
 import Main from '../Main/Main';
-import React, { Fragment, useEffect, useState } from 'react';
+import { Fragment} from 'react';
 import { Route, Routes } from 'react-router-dom';
 import NotFoundPage from '../NotFoundPage/NotFoundPage';
 

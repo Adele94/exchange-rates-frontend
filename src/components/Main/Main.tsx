@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import TextField from '@mui/material/TextField';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import Box from '@mui/material/Box';
@@ -9,15 +8,16 @@ import '../../i18n';
 import { useTranslation } from "react-i18next";
 import { availableLanguages } from "../../i18n";
 import * as MainApi from "../../utils/MainApi";
-import { symbols } from '../../config/constants';
+import InputSection from './InputSection/InputSection';
 
 function Main() {
   const [currencyFrom, setCurrencyFrom] = useState('RUB');
   const [currencyTo, setCurrencyTo] = useState('USD');
-  const [textValueFirst, setTextValueFirst] = useState<string>("0");
-  const [textValueSecond, setTextValueSecond] = useState<string>("0");
+  const [textValueFirst, setTextValueFirst] = useState<string>("100");
+  const [textValueSecond, setTextValueSecond] = useState<string>("");
   const [errorFieldFrom, setErrorFieldFrom] = useState<{ textFieldFrom: string }>();
   const [errorFieldTo, setErrorFieldTo] = useState<{ textFieldTo: string }>();
+  const [symbols, setSymbols] = useState<Array<string>>([]);
 
   const { t, i18n } = useTranslation()
 
@@ -29,22 +29,26 @@ function Main() {
     setCurrencyTo(event.target.value.toString());
   };
 
+  const reg = new RegExp(/^([1-9]\d*)(\.\d+)?$/);
+
   const handleButtonClick = (event: React.MouseEvent<HTMLElement>) => {
-    let fromCurrancy = currencyFrom;
-    setCurrencyFrom(currencyTo);
-    setCurrencyTo(fromCurrancy);
+    if (reg.test(textValueFirst) && reg.test(textValueSecond)) {
+      let fromCurrancy = currencyFrom;
+      setCurrencyFrom(currencyTo);
+      setCurrencyTo(fromCurrancy);
+    }
   };
 
   const handleTextChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { target: { value } } = event;
-    const reg = new RegExp(/^(0|[1-9]\d*)(\.\d+)?$/).test(value);
-
+    const regExp = reg.test(value);
     if (event.target.id === 'input-from') {
       setTextValueFirst(value);
-      if (!reg) {
+      if (!regExp) {
         setErrorFieldFrom({ textFieldFrom: 'error' })
       } else {
         setErrorFieldFrom({ textFieldFrom: '' })
+        setErrorFieldTo({ textFieldTo: '' })
         MainApi.convert(currencyFrom, currencyTo, +value)
           .then(res => {
             setTextValueSecond((res.conversion_result).toString());
@@ -52,10 +56,11 @@ function Main() {
       }
     } else {
       setTextValueSecond(value);
-      if (!reg) {
+      if (!regExp) {
         setErrorFieldTo({ textFieldTo: 'error' })
       } else {
         setErrorFieldTo({ textFieldTo: '' })
+        setErrorFieldFrom({ textFieldFrom: '' })
         MainApi.convert(currencyTo, currencyFrom, +value)
           .then(res => {
             setTextValueFirst((res.conversion_result).toString());
@@ -65,12 +70,20 @@ function Main() {
   };
 
   useEffect(() => {
-    if (textValueFirst && +textValueFirst !== 0) {
-      MainApi.convert(currencyFrom, currencyTo, +textValueFirst)
-        .then(res => {
-          setTextValueSecond((res.conversion_result).toString());
-        });
-    }
+    MainApi.getSupportedCodes()
+      .then(res => {
+        let symbolsArray = res.supported_codes.map((item: any[])=> {
+          return item[0];
+       })
+        setSymbols(symbolsArray);
+      }); 
+  }, [])
+
+  useEffect(() => {
+    MainApi.convert(currencyFrom, currencyTo, +textValueFirst)
+      .then(res => {
+        setTextValueSecond((res.conversion_result).toString());
+      });
   }, [currencyFrom, currencyTo]);
 
   return (
@@ -81,43 +94,28 @@ function Main() {
           <MenuItem key={language} value={language}>{language}</MenuItem>
         ))}
       </Select>
-      <Box className="converter__content" component="form" sx={{ minWidth: 120 }}>
-        <div className="converter__input-container">
-          <TextField className="converter__input-field"
-            id="input-from" label={t('change')} onChange={(e) => handleTextChange(e)}
-            value={textValueFirst}
-            error={Boolean(errorFieldFrom?.textFieldFrom)}
-            helperText={errorFieldFrom?.textFieldFrom ? t('error') : ''}
-            variant="outlined" />
-          <Select className="converter__select"
-            id="select-from"
-            value={currencyFrom}
-            onChange={handleChangeFrom}
-            required
-          >
-            {symbols.map((item: any) => (
-              <MenuItem key={item} value={item} >{item}</MenuItem>
-            ))}
-          </Select>
-        </div>
+      <Box className="converter__content" component="form">
+        <InputSection
+          label="change"
+          handleTextChange={handleTextChange}
+          textValue={textValueFirst}
+          error={errorFieldFrom?.textFieldFrom}
+          id="input-from"
+          currency={currencyFrom}
+          handleChange={handleChangeFrom}
+          symbols={symbols}>{ }
+        </InputSection>
         <Button className="converter__transfer-btn" onClick={(e) => handleButtonClick(e)}><img src={transferIcon} alt={t('altArrowBtn')} /></Button>
-        <div className="converter__input-container">
-          <TextField className="converter__input-field" id="input-to"
-            label={t('get')} onChange={(e) => handleTextChange(e)}
-            value={textValueSecond}
-            error={Boolean(errorFieldTo?.textFieldTo)}
-            helperText={errorFieldTo?.textFieldTo ? t('error') : ''}
-            variant="outlined" />
-          <Select className="converter__select"
-            id="select-to"
-            value={currencyTo}
-            onChange={handleChangeTo}
-          >
-            {symbols.map((item: any) => (
-              <MenuItem key={item} value={item} >{item}</MenuItem>
-            ))}
-          </Select>
-        </div>
+        <InputSection
+          label="get"
+          handleTextChange={handleTextChange}
+          textValue={textValueSecond}
+          error={errorFieldTo?.textFieldTo}
+          id="input-to"
+          currency={currencyTo}
+          handleChange={handleChangeTo}
+          symbols={symbols}>{ }
+        </InputSection>
       </Box>
     </main>
   );
