@@ -1,4 +1,3 @@
-
 function NotFoundPage() {
   return (
     <main className="notFoundPage">

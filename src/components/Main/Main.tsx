@@ -11,8 +11,8 @@ import * as MainApi from "../../utils/MainApi";
 import InputSection from './InputSection/InputSection';
 
 function Main() {
-  const [currencyFrom, setCurrencyFrom] = useState('RUB');
-  const [currencyTo, setCurrencyTo] = useState('USD');
+  const [currencyFrom, setCurrencyFrom] = useState<string>("RUB");
+  const [currencyTo, setCurrencyTo] = useState<string>("USD");
   const [textValueFirst, setTextValueFirst] = useState<string>("100");
   const [textValueSecond, setTextValueSecond] = useState<string>("");
   const [errorFieldFrom, setErrorFieldFrom] = useState<{ textFieldFrom: string }>();
@@ -20,6 +20,12 @@ function Main() {
   const [symbols, setSymbols] = useState<Array<string>>([]);
 
   const { t, i18n } = useTranslation()
+  const reg = new RegExp(/^(0|[1-9]\d*)(\.\d+)?$/);
+
+  const resetError = () => {
+    setErrorFieldTo({ textFieldTo: '' });
+    setErrorFieldFrom({ textFieldFrom: '' });
+  };
 
   const handleChangeFrom = (event: SelectChangeEvent) => {
     setCurrencyFrom(event.target.value.toString());
@@ -28,8 +34,6 @@ function Main() {
   const handleChangeTo = (event: SelectChangeEvent) => {
     setCurrencyTo(event.target.value.toString());
   };
-
-  const reg = new RegExp(/^([1-9]\d*)(\.\d+)?$/);
 
   const handleButtonClick = (event: React.MouseEvent<HTMLElement>) => {
     if (reg.test(textValueFirst) && reg.test(textValueSecond)) {
@@ -41,14 +45,18 @@ function Main() {
 
   const handleTextChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { target: { value } } = event;
+    if(value === '0') {
+      setTextValueFirst('0');
+      setTextValueSecond('0');
+      return;
+    } // because api return incorrect result
     const regExp = reg.test(value);
     if (event.target.id === 'input-from') {
       setTextValueFirst(value);
       if (!regExp) {
         setErrorFieldFrom({ textFieldFrom: 'error' })
       } else {
-        setErrorFieldFrom({ textFieldFrom: '' })
-        setErrorFieldTo({ textFieldTo: '' })
+        resetError();
         MainApi.convert(currencyFrom, currencyTo, +value)
           .then(res => {
             setTextValueSecond((res.conversion_result).toString());
@@ -59,8 +67,7 @@ function Main() {
       if (!regExp) {
         setErrorFieldTo({ textFieldTo: 'error' })
       } else {
-        setErrorFieldTo({ textFieldTo: '' })
-        setErrorFieldFrom({ textFieldFrom: '' })
+        resetError();
         MainApi.convert(currencyTo, currencyFrom, +value)
           .then(res => {
             setTextValueFirst((res.conversion_result).toString());
@@ -72,17 +79,19 @@ function Main() {
   useEffect(() => {
     MainApi.getSupportedCodes()
       .then(res => {
-        let symbolsArray = res.supported_codes.map((item: any[])=> {
+        let symbolsArray = res.supported_codes.map((item: any[]) => {
           return item[0];
-       })
+        })
         setSymbols(symbolsArray);
-      }); 
+      });
   }, [])
 
   useEffect(() => {
+    if (+textValueFirst === 0) { setTextValueSecond('0'); return; }
     MainApi.convert(currencyFrom, currencyTo, +textValueFirst)
       .then(res => {
         setTextValueSecond((res.conversion_result).toString());
+        resetError();
       });
   }, [currencyFrom, currencyTo]);
 
