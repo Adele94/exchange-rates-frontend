@@ -25,7 +25,7 @@
   text-align: left;
   padding-top: 70px;
   padding-bottom: 70px;
-  max-width: 600px;
+  max-width: 700px;
   display: flex;
   justify-content: space-between;
 }
@@ -33,11 +33,20 @@
 .converter__input-container{
   margin: 20px auto;
   display: flex;
-  min-width: 40%;
+  max-width: 38%;
 }
 
 .converter__input-field {
   width: 100%;
+}
+
+.converter__transfer-btn {
+  max-height: 56px;
+  top: 20px;
+}
+
+.converter__select{
+  max-height: 56px;
 }
 
 @media screen and (max-width: 540px) {
@@ -45,5 +54,11 @@
     margin: 0 20px;
     display: block;
     text-align: center;
+  }
+  .converter__input-container{
+    max-width: 80%;
+  }
+  .converter__transfer-btn {
+    top: 0px;
   }
 }

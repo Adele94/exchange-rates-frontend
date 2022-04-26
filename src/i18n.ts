@@ -5,14 +5,20 @@ import LanguageDetector from "i18next-browser-languagedetector";
 const resources = {
   en: {
     common: {
+      "title": "Currency сonverter",
       "change": "Сhange",
-      "get": "Get"
+      "get": "Get",
+      "error": "Only positive numbers are permitted",
+      "altArrowBtn": "Arrow"
     }
   },
   rus: {
     common: {
+      "title": "Конвертер валют",
       "change": "Меняю",
-      "get": "Получаю"
+      "get": "Получаю",
+      "error": "Должно быть положительным числом",
+      "altArrowBtn": "Стрелка"
     }
   }
 }

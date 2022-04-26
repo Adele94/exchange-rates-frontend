@@ -54,10 +54,12 @@
     padding-top: 329px;
     padding-bottom: 30px;
   }
+
   .notFoundPage__error {
     font-size: 80px;
     line-height: 97px;
   }
+  
   .notFoundPage__text {
     margin: 10px auto 284px;
     font-size: 12px;
